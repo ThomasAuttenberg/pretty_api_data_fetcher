@@ -35,7 +35,6 @@ const copyable = ref(Boolean(uuid));
 const loadedFailed = ref(uuid == '');
 const loaded = ref(uuid != '');
 const API_ENDPOINT = '';
-console.log("loaded: "+loaded.value);
 
 if(uuid) {
   getData();
@@ -64,6 +63,7 @@ function getData(){
   copyable.value=false;
   loaded.value = false;
   uuid = route.params.id as string;
+  if(uuid){
   inputPlaceHolderText.value = "uuid: "+uuid;
   fetchData(route.params.id as string).then((data)=>{
     information.value = data;
@@ -75,20 +75,24 @@ function getData(){
       case 404: loadingFailMessage.value='Профиль не найден';
       break;
       case 400:
-        loadingFailMessage.value="Bad Request: сервер не понимает запрос. Данные в консоли";
-        console.log("Ошибка во время выполнения запроса: "+err.message);
+        loadingFailMessage.value="Bad Request (code:400): сервер не понимает запрос. Данные в консоли";
+        console.log("Ошибка во время выполнения запроса: "+err);
         break;
       case 500:
-        loadingFailMessage.value="Ошибка сервера. Данные в консоли";
+        loadingFailMessage.value="Ошибка сервера (code: 500)";
         console.log("Ошибка сервера: "+err.message);
         break;
       default:
-        loadingFailMessage.value=err.message + '\n'+ err.response;
-        console.log("Ошибка на сервере:"+err);
+        loadingFailMessage.value="Ошибка: (code:"+err.response?.status+"). Данные в консоли";
+        console.log(err);
         break;
     }
     loadedFailed.value = true;
   });
+  }else{
+    loaded.value = true;
+    inputPlaceHolderText.value = "uuid";
+  }
 }
 
 function backFocusOnInput() {
